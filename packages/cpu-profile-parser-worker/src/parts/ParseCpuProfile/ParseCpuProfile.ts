@@ -45,22 +45,73 @@ const readString = (value: unknown): string => {
   return typeof value === 'string' ? value : ''
 }
 
+const readLineNumber = (value: unknown, nodeId: number): number => {
+  if (value === undefined) {
+    return -1
+  }
+  if (!Number.isSafeInteger(value) || (value as number) < -1) {
+    throw new Error(`CPU profile node ${nodeId} callFrame.lineNumber must be an integer greater than or equal to -1`)
+  }
+  return value as number
+}
+
+const readHitCount = (value: unknown, nodeId: number): number => {
+  if (value === undefined) {
+    return 0
+  }
+  if (!Number.isSafeInteger(value) || (value as number) < 0) {
+    throw new Error(`CPU profile node ${nodeId} hitCount must be a non-negative integer`)
+  }
+  return value as number
+}
+
+const readUrl = (value: unknown, nodeId: number): string => {
+  if (value === undefined) {
+    return ''
+  }
+  if (typeof value !== 'string') {
+    throw new TypeError(`CPU profile node ${nodeId} callFrame.url must be a string`)
+  }
+  return value
+}
+
+const readChildren = (value: unknown, nodeId: number): readonly number[] => {
+  if (value === undefined) {
+    return []
+  }
+  if (!Array.isArray(value) || value.some((childId) => !Number.isSafeInteger(childId))) {
+    throw new Error(`CPU profile node ${nodeId} children must contain only integer node ids`)
+  }
+  return value
+}
+
+const parseTimeDeltas = (value: unknown): readonly number[] => {
+  if (value === undefined) {
+    return []
+  }
+  if (
+    !Array.isArray(value) ||
+    value.some((delta) => typeof delta !== 'number' || !Number.isFinite(delta) || delta < 0)
+  ) {
+    throw new Error('CPU profile timeDeltas must contain only non-negative finite numbers')
+  }
+  return value
+}
+
 const parseNode = (value: unknown): RawNode => {
   if (!isRecord(value) || !Number.isSafeInteger(value.id)) {
     throw new Error('Every CPU profile node must have an integer id')
   }
+  const id = value.id as number
   const callFrame = isRecord(value.callFrame) ? value.callFrame : {}
-  const children = Array.isArray(value.children)
-    ? value.children.filter((child): child is number => Number.isSafeInteger(child))
-    : []
   return {
-    children,
+    children: readChildren(value.children, id),
     columnNumber: readFiniteNumber(callFrame.columnNumber, -1),
     functionName: readString(callFrame.functionName) || '(anonymous)',
-    hitCount: readNonNegativeNumber(value.hitCount),
-    id: value.id as number,
-    lineNumber: readFiniteNumber(callFrame.lineNumber, -1),
-    url: readString(callFrame.url),
+    hitCount: readHitCount(value.hitCount, id),
+    id,
+    lineNumber: readLineNumber(callFrame.lineNumber, id),
+    url: readUrl(callFrame.url, id),
   }
 }
 
@@ -76,7 +127,10 @@ const formatLocation = (node: RawNode): string => {
 const getElapsedDuration = (profile: Readonly<Record<string, unknown>>): number => {
   const startTime = readFiniteNumber(profile.startTime)
   const endTime = readFiniteNumber(profile.endTime)
-  return Math.max(0, (endTime - startTime) / 1000)
+  if (endTime < startTime) {
+    throw new Error('CPU profile endTime must be greater than or equal to startTime')
+  }
+  return (endTime - startTime) / 1000
 }
 
 const getSampleDurations = (
@@ -109,13 +163,19 @@ const addToNodeAndAncestors = (
 // CPU profiles are compact transport objects, so parsing and aggregation intentionally happen in one pass.
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const parseCpuProfile = (content: string): CpuProfile => {
+  if (content.trim() === '') {
+    throw new Error('CPU profile file is empty')
+  }
   let value: unknown
   try {
     value = JSON.parse(content)
   } catch {
     throw new Error('CPU profile is not valid JSON')
   }
-  if (!isRecord(value) || !Array.isArray(value.nodes) || value.nodes.length === 0) {
+  if (!isRecord(value)) {
+    throw new Error('CPU profile must be a JSON object')
+  }
+  if (!Array.isArray(value.nodes) || value.nodes.length === 0) {
     throw new Error('CPU profile must contain a non-empty nodes array')
   }
 
@@ -131,16 +191,51 @@ export const parseCpuProfile = (content: string): CpuProfile => {
   const parentById = new Map<number, number>()
   for (const node of rawNodes) {
     for (const childId of node.children) {
-      if (nodeById.has(childId) && childId !== node.id && !parentById.has(childId)) {
+      if (!nodeById.has(childId)) {
+        throw new Error(`CPU profile node ${node.id} references unknown child node ${childId}`)
+      }
+      if (childId === node.id) {
+        throw new Error(`CPU profile node ${node.id} cannot reference itself as a child`)
+      }
+      const existingParentId = parentById.get(childId)
+      if (existingParentId !== undefined && existingParentId !== node.id) {
+        throw new Error(`CPU profile node ${childId} has multiple parents: ${existingParentId} and ${node.id}`)
+      }
+      if (existingParentId === undefined) {
         parentById.set(childId, node.id)
       }
     }
   }
+  const rootIds = rawNodes.filter((node) => !parentById.has(node.id)).map((node) => node.id)
+  const reachableNodeIds = new Set<number>()
+  const pendingNodeIds = [...rootIds]
+  while (pendingNodeIds.length > 0) {
+    const id = pendingNodeIds.pop() as number
+    if (reachableNodeIds.has(id)) {
+      continue
+    }
+    reachableNodeIds.add(id)
+    const children = nodeById.get(id)?.children ?? []
+    for (const childId of children) {
+      pendingNodeIds.push(childId)
+    }
+  }
+  if (reachableNodeIds.size !== rawNodes.length) {
+    throw new Error('CPU profile call tree contains a cycle')
+  }
 
   const samples = Array.isArray(value.samples)
-    ? value.samples.filter((sample): sample is number => Number.isSafeInteger(sample) && nodeById.has(sample))
+    ? value.samples.map((sample) => {
+        if (!Number.isSafeInteger(sample) || !nodeById.has(sample as number)) {
+          throw new Error(`CPU profile sample ${String(sample)} references an unknown node`)
+        }
+        return sample as number
+      })
     : []
-  const timeDeltas = Array.isArray(value.timeDeltas) ? value.timeDeltas : []
+  const timeDeltas = parseTimeDeltas(value.timeDeltas)
+  if (timeDeltas.length > 0 && timeDeltas.length !== samples.length) {
+    throw new Error('CPU profile timeDeltas length must match samples length')
+  }
   const elapsedDuration = getElapsedDuration(value)
   const sampleDurations = getSampleDurations(samples.length, timeDeltas, elapsedDuration)
   const selfTimes = new Map<number, number>()
@@ -182,12 +277,10 @@ export const parseCpuProfile = (content: string): CpuProfile => {
       url: node.url,
     }
   })
-  const rootIds = rawNodes.filter((node) => !parentById.has(node.id)).map((node) => node.id)
-
   return {
     duration,
     nodes,
-    rootIds: rootIds.length > 0 ? rootIds : [rawNodes[0].id],
+    rootIds,
     sampleCount: samples.length,
   }
 }
