@@ -25,7 +25,7 @@
       "kind": "virtualDom",
       "type": "preview",
       "css": "media/index.css",
-      "selector": [".cpuprofile"],
+      "selector": [".cpuprofile", ".json"],
       "showSideBarHeader": false
     }
   ]
