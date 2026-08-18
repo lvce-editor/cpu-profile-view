@@ -3,7 +3,7 @@ import { profile } from './cpu-profile-view.ts'
 
 export const name = 'cpu-profile-view.reopen-json'
 
-export const test: Test = async ({ Command, expect, FileSystem, Locator, Main, Workspace }) => {
+export const test: Test = async ({ Command, expect, FileSystem, Locator, Main, QuickPick, Workspace }) => {
   const temporaryDirectory = await FileSystem.getTmpDir()
   const uri = `${temporaryDirectory}/dashboard.json`
   await FileSystem.writeFile(uri, profile)
@@ -15,12 +15,7 @@ export const test: Test = async ({ Command, expect, FileSystem, Locator, Main, W
   await new Promise((resolve) => setTimeout(resolve, 500))
   const cpuProfileChoice = Locator('.QuickPickItem', { hasText: 'CPU Profile' })
   await expect(cpuProfileChoice).toBeVisible()
-  await cpuProfileChoice.dispatchEvent('pointerdown', {
-    bubbles: true,
-    clientX: 200,
-    clientY: 100,
-    pointerId: 1,
-  } as any)
+  await QuickPick.selectItem('CPU Profile')
   await reopenPromise
 
   const view = Locator('.CpuProfileView')
