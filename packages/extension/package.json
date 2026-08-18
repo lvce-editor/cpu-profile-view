@@ -14,7 +14,7 @@
     "collectCoverageFrom": [
       "src/parts/FormatTime/**/*.ts",
       "src/parts/CpuProfileParserWorker/**/*.ts",
-      "src/parts/RenderCpuProfile/**/*.ts",
+      "src/parts/{Element,Flatten,GetVisibleRows,Render*,Span,TextNode,Visit}/**/*.ts",
       "src/parts/CpuProfileViewInstance/**/*.ts"
     ],
     "coverageThreshold": {
