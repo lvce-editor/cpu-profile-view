@@ -1,0 +1,130 @@
+.CpuProfileView {
+  contain: strict;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  color: var(--EditorForeground, inherit);
+  background: var(--EditorBackground, transparent);
+  font-family: var(--EditorFontFamily, sans-serif);
+  font-size: 13px;
+}
+
+.CpuProfileHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--PanelBorder, rgba(128, 128, 128, 0.35));
+  background: var(--EditorBackground, transparent);
+}
+
+.CpuProfileTitle {
+  font-weight: 600;
+}
+
+.CpuProfileSummary,
+.CpuProfilePercentage,
+.CpuProfileLocationCell {
+  color: var(--DescriptionForeground, rgba(128, 128, 128, 1));
+}
+
+.CpuProfileTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  cursor: default;
+}
+
+.CpuProfileTableHeader {
+  position: sticky;
+  top: 36px;
+  z-index: 1;
+  background: var(--EditorBackground, transparent);
+}
+
+.CpuProfileTableHeaderRow,
+.CpuProfileTableRow {
+  height: 26px;
+}
+
+.CpuProfileTableRow:where(:hover) {
+  background: var(--ListHoverBackground, rgba(128, 128, 128, 0.18));
+}
+
+.CpuProfileTimeHeaderCell,
+.CpuProfileFunctionHeaderCell,
+.CpuProfileLocationHeaderCell,
+.CpuProfileSelfTimeCell,
+.CpuProfileTotalTimeCell,
+.CpuProfileFunctionCell,
+.CpuProfileLocationCell {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--PanelBorder, rgba(128, 128, 128, 0.2));
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.CpuProfileTimeHeaderCell,
+.CpuProfileSelfTimeCell,
+.CpuProfileTotalTimeCell {
+  width: 150px;
+  text-align: right;
+}
+
+.CpuProfileLocationHeaderCell,
+.CpuProfileLocationCell {
+  width: 35%;
+}
+
+.CpuProfileTime {
+  font-variant-numeric: tabular-nums;
+}
+
+.CpuProfilePercentage {
+  display: inline-block;
+  min-width: 52px;
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.CpuProfileFunctionCell {
+  font-family: var(--EditorFontFamily, monospace);
+}
+
+.CpuProfileIndent {
+  display: inline-block;
+  width: 14px;
+}
+
+.CpuProfileDisclosure,
+.CpuProfileDisclosurePlaceholder {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0 2px 0 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
+.CpuProfileDisclosure {
+  cursor: pointer;
+}
+
+.CpuProfileDisclosure:focus-visible {
+  outline: 1px solid var(--FocusBorder, currentColor);
+}

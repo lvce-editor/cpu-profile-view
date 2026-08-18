@@ -1,0 +1,23 @@
+{
+  "id": "builtin.cpu-profile-view",
+  "name": "CPU Profile View",
+  "workerName": "CPU Profile View Extension Worker",
+  "description": "Inspect Chrome and V8 CPU profiles",
+  "repository": "https://github.com/lvce-editor/cpu-profile-view",
+  "browser": "dist/cpuProfileViewMain.js",
+  "isolated": true,
+  "contentSecurityPolicy": ["default-src 'none'", "script-src 'self'"],
+  "activation": ["onView:builtin.cpu-profile-view"],
+  "languages": [],
+  "views": [
+    {
+      "id": "builtin.cpu-profile-view",
+      "title": "CPU Profile",
+      "kind": "virtualDom",
+      "type": "preview",
+      "css": "media/index.css",
+      "selector": [".cpuprofile"],
+      "showSideBarHeader": false
+    }
+  ]
+}
