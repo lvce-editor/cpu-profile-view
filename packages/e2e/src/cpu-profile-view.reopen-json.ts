@@ -12,6 +12,7 @@ export const test: Test = async ({ Command, expect, FileSystem, Locator, Main, W
   await Main.openUri(uri)
 
   const reopenPromise = Command.execute('Main.reopenEditorWith')
+  await new Promise((resolve) => setTimeout(resolve, 500))
   const cpuProfileChoice = Locator('.QuickPickItem', { hasText: 'CPU Profile' })
   await expect(cpuProfileChoice).toBeVisible()
   await cpuProfileChoice.dispatchEvent('pointerdown', {
