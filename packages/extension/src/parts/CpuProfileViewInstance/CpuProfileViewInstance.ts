@@ -1,7 +1,7 @@
 import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
 import { readFile, type ViewContext, type ViewEvent, type VirtualDomViewInstance } from '@lvce-editor/api'
-import type { CpuProfile } from '../ParseCpuProfile/ParseCpuProfile.ts'
-import { parseCpuProfile } from '../ParseCpuProfile/ParseCpuProfile.ts'
+import type { CpuProfile } from '../CpuProfile/CpuProfile.ts'
+import { parseCpuProfile } from '../CpuProfileParserWorker/CpuProfileParserWorker.ts'
 import { render } from '../RenderCpuProfile/RenderCpuProfile.ts'
 
 interface CpuProfileViewContext extends ViewContext {
@@ -24,10 +24,12 @@ export interface CpuProfileViewInstance extends VirtualDomViewInstance {
 }
 
 export interface CpuProfileViewDependencies {
+  readonly parseCpuProfile: (content: string) => Promise<CpuProfile>
   readonly readFile: (uri: string) => Promise<string>
 }
 
 const defaultDependencies: CpuProfileViewDependencies = {
+  parseCpuProfile,
   readFile,
 }
 
@@ -69,7 +71,8 @@ export const createInstanceWithDependencies = async (
 ): Promise<CpuProfileViewInstance> => {
   const savedState = getSavedState(context)
   const uri = getUri(context, savedState)
-  const profile = parseCpuProfile(await dependencies.readFile(uri))
+  const content = await dependencies.readFile(uri)
+  const profile = await dependencies.parseCpuProfile(content)
   let state: CpuProfileViewState = {
     expandedNodeIds: getExpandedNodeIds(savedState, profile),
     profile,

@@ -12,6 +12,21 @@ const output = path.join(root, 'dist')
 const require = createRequire(import.meta.url)
 const commonjs = require('@rollup/plugin-commonjs') as () => Plugin
 
+const bundleEntry = async (input: string, output: string): Promise<void> => {
+  const bundle = await rollup({
+    external: ['electron', 'node:*'],
+    input,
+    plugins: [nodeResolve({ browser: true }), commonjs(), esbuild({ target: 'esnext' })],
+    treeshake: { moduleSideEffects: false },
+  })
+
+  await bundle.write({
+    file: output,
+    format: 'esm',
+  })
+  await bundle.close()
+}
+
 fs.rmSync(output, { force: true, recursive: true })
 fs.mkdirSync(path.join(output, 'dist'), { recursive: true })
 fs.mkdirSync(path.join(output, 'media'), { recursive: true })
@@ -20,18 +35,13 @@ fs.copyFileSync(path.join(root, 'README.md'), path.join(output, 'README.md'))
 fs.copyFileSync(path.join(extension, 'extension.json'), path.join(output, 'extension.json'))
 fs.copyFileSync(path.join(extension, 'media', 'index.css'), path.join(output, 'media', 'index.css'))
 
-const bundle = await rollup({
-  external: ['electron', 'node:*'],
-  input: path.join(extension, 'src', 'cpuProfileViewMain.ts'),
-  plugins: [nodeResolve({ browser: true }), commonjs(), esbuild({ target: 'esnext' })],
-  treeshake: { moduleSideEffects: false },
-})
-
-await bundle.write({
-  file: path.join(output, 'dist', 'cpuProfileViewMain.js'),
-  format: 'esm',
-})
-await bundle.close()
+await Promise.all([
+  bundleEntry(
+    path.join(root, 'packages', 'cpu-profile-parser-worker', 'src', 'cpuProfileParserWorkerMain.ts'),
+    path.join(output, 'dist', 'cpuProfileParserWorkerMain.js'),
+  ),
+  bundleEntry(path.join(extension, 'src', 'cpuProfileViewMain.ts'), path.join(output, 'dist', 'cpuProfileViewMain.js')),
+])
 
 await packageExtension({
   highestCompression: true,

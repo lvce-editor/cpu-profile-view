@@ -1,4 +1,5 @@
 import { activate as activateExtensionApi, registerView } from '@lvce-editor/api'
+import { dispose as disposeCpuProfileParserWorker } from '../CpuProfileParserWorker/CpuProfileParserWorker.ts'
 import { view } from '../CpuProfileView/CpuProfileView.ts'
 
 const state = {
@@ -15,4 +16,6 @@ export const activate = async (): Promise<void> => {
   registerView(view)
 }
 
-export const deactivate = (): void => {}
+export const deactivate = async (): Promise<void> => {
+  await disposeCpuProfileParserWorker()
+}

@@ -1,7 +1,7 @@
 // cspell:word treegrid
 import { text, VirtualDomElements, type VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
+import type { CpuProfileNode } from '../CpuProfile/CpuProfile.ts'
 import type { CpuProfileViewState } from '../CpuProfileViewInstance/CpuProfileViewInstance.ts'
-import type { CpuProfileNode } from '../ParseCpuProfile/ParseCpuProfile.ts'
 import { formatPercentage, formatTime } from '../FormatTime/FormatTime.ts'
 
 interface TreeNode {
