@@ -15,6 +15,12 @@ export default defineConfig([
     },
   },
   {
+    files: ['packages/cpu-profile-parser-worker/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/prefer-readonly-parameter-types': 'off',
+    },
+  },
+  {
     files: ['packages/extension/src/parts/RenderCpuProfile/**/*.ts'],
     rules: {
       'virtual-dom/hoist-static-nodes': 'off',

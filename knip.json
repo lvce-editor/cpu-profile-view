@@ -9,6 +9,10 @@
     "packages/build": {
       "project": ["src/**/*.ts"]
     },
+    "packages/cpu-profile-parser-worker": {
+      "entry": ["src/cpuProfileParserWorkerMain.ts", "test/**/*.test.ts"],
+      "project": ["src/**/*.ts", "test/**/*.ts"]
+    },
     "packages/e2e": {
       "entry": ["src/**/*.ts"],
       "project": ["src/**/*.ts"]

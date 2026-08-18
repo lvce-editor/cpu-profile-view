@@ -1,21 +1,17 @@
 {
-  "name": "builtin.cpu-profile-view",
+  "name": "cpu-profile-parser-worker",
   "version": "0.0.0-dev",
-  "description": "CPU profile viewer extension for Lvce Editor",
-  "main": "dist/cpuProfileViewMain.js",
+  "description": "CPU profile parsing worker for CPU Profile View",
   "type": "module",
-  "author": "Lvce Editor",
-  "license": "MIT",
+  "main": "src/cpuProfileParserWorkerMain.ts",
+  "private": true,
   "scripts": {
     "test": "node --unhandled-rejections=warn --experimental-vm-modules ../../node_modules/jest/bin/jest.js --detectOpenHandles --forceExit"
   },
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "src/parts/FormatTime/**/*.ts",
-      "src/parts/CpuProfileParserWorker/**/*.ts",
-      "src/parts/{Element,Flatten,GetVisibleRows,Render*,Span,TextNode,Visit}/**/*.ts",
-      "src/parts/CpuProfileViewInstance/**/*.ts"
+      "src/parts/ParseCpuProfile/**/*.ts"
     ],
     "coverageThreshold": {
       "global": {
@@ -44,10 +40,11 @@
       ]
     }
   },
+  "dependencies": {
+    "@lvce-editor/rpc": "^6.18.0"
+  },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
-    "@lvce-editor/api": "^9.19.0",
-    "@lvce-editor/virtual-dom-worker": "^11.12.2",
     "jest": "^30.4.2",
     "ts-jest": "^29.4.12"
   }

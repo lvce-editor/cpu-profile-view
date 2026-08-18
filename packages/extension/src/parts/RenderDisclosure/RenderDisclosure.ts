@@ -1,5 +1,5 @@
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
-import type { CpuProfileNode } from '../ParseCpuProfile/ParseCpuProfile.ts'
+import type { CpuProfileNode } from '../CpuProfile/CpuProfile.ts'
 import type { TreeNode } from '../TreeNode/TreeNode.ts'
 import { element } from '../Element/Element.ts'
 import { textNode } from '../TextNode/TextNode.ts'

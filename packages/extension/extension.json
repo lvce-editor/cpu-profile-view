@@ -7,6 +7,15 @@
   "browser": "dist/cpuProfileViewMain.js",
   "isolated": true,
   "contentSecurityPolicy": ["default-src 'none'", "script-src 'self'"],
+  "rpc": [
+    {
+      "id": "builtin.cpu-profile-view.parser-worker",
+      "type": "web-worker",
+      "name": "CPU Profile Parser Worker",
+      "url": "dist/cpuProfileParserWorkerMain.js",
+      "contentSecurityPolicy": ["default-src 'none'", "script-src 'self'"]
+    }
+  ],
   "activation": ["onView:builtin.cpu-profile-view"],
   "languages": [],
   "views": [

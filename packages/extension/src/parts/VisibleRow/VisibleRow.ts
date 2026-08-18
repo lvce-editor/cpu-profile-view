@@ -1,4 +1,4 @@
-import type { CpuProfileNode } from '../ParseCpuProfile/ParseCpuProfile.ts'
+import type { CpuProfileNode } from '../CpuProfile/CpuProfile.ts'
 
 export interface VisibleRow {
   readonly depth: number

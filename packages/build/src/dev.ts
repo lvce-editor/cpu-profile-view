@@ -4,12 +4,22 @@ import path from 'node:path'
 import { root } from './root.ts'
 
 const extension = path.join(root, 'packages', 'extension')
+const entryPoints = {
+  cpuProfileParserWorkerMain: path.join(
+    root,
+    'packages',
+    'cpu-profile-parser-worker',
+    'src',
+    'cpuProfileParserWorkerMain.ts',
+  ),
+  cpuProfileViewMain: path.join(extension, 'src', 'cpuProfileViewMain.ts'),
+}
 const context = await esbuild.context({
   bundle: true,
-  entryPoints: [path.join(extension, 'src', 'cpuProfileViewMain.ts')],
+  entryPoints,
   external: ['electron', 'node:*'],
   format: 'esm',
-  outfile: path.join(extension, 'dist', 'cpuProfileViewMain.js'),
+  outdir: path.join(extension, 'dist'),
   platform: 'browser',
   sourcemap: true,
   target: 'esnext',

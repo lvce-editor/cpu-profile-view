@@ -1,4 +1,4 @@
-import type { CpuProfileNode } from '../ParseCpuProfile/ParseCpuProfile.ts'
+import type { CpuProfileNode } from '../CpuProfile/CpuProfile.ts'
 import type { VisibleRow } from '../VisibleRow/VisibleRow.ts'
 
 export const visit = (
