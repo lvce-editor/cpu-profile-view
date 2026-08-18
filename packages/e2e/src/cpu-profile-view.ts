@@ -2,7 +2,7 @@ import type { Test } from '@lvce-editor/test-with-playwright'
 
 export const name = 'cpu-profile-view.opens-profile'
 
-const profile = JSON.stringify({
+export const profile = JSON.stringify({
   endTime: 10_000,
   nodes: [
     {
